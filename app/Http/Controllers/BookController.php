@@ -56,6 +56,14 @@ class BookController extends Controller
         return response()->json($book, 200);
     }
 
+    public function getGenres(Request $request)
+    {
+        $genre = DB::table('genre')
+            ->get();
+
+        return response()->json($genre, 200);
+    }
+
     public function getBestsellers()
     {
         $books = DB::table('books') //TODO use Model class ex. Book::select()->where()->orderBy()->get()
@@ -112,25 +120,59 @@ class BookController extends Controller
         $stock_level = $request->input('stock_level', '');
         $type_id = $request->input('type_id', '');
         $publisher_id = $request->input('publisher_id', '');
+        $author_id = $request->input('author_id', '');
         $date = date("Y-m-d H:i:s");
-        $article_old_image = $request->input('book_old_image', '');
+        $book_old_image = $request->input('book_old_image', '');
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $input['imagename'] = $image->getClientOriginalName();
             $destinationPath = public_path('images/books');
             $image->move($destinationPath, $input['imagename']);
-            File::delete(public_path($article_old_image));
+            File::delete(public_path($book_old_image));
             $imagePath = 'images/books/' . $input['imagename'];
         } else {
-            $imagePath = $article_old_image;
+            $imagePath = $book_old_image;
         }
 
         $book = DB::table('books')
-            ->where('books.id', $id)
+            ->where('books.book_id', $id)
             ->update(['title' => $title, 'description'=>$description, 'isbn'=>$isbn, 'publication_year'=>$publication_year,
                 'price'=>$price, 'genre_id'=>$genre_id, 'stock_level'=>$stock_level, 'type_id'=>$type_id,
-                'publisher_id'=>$publisher_id, 'image'=>$imagePath, 'updated_at'=>$date]);
+                'publisher_id'=>$publisher_id, 'author_id'=>$author_id, 'image'=>$imagePath, 'updated_at'=>$date]);
+
+        return response()->json([$book], 200);
+    }
+
+    public function postAddBook(Request $request)
+    {
+        $id = $request->input('id', '');
+        $title = $request->input('title', '');
+        $description = $request->input('description', '');
+        $isbn = $request->input('isbn', '');
+        $publication_year = $request->input('publication_year', '');
+        $price = $request->input('price', '');
+        $genre_id = $request->input('genre_id', '');
+        $stock_level = $request->input('stock_level', '');
+        $type_id = $request->input('type_id', '');
+        $publisher_id = $request->input('publisher_id', '');
+        $author_id = $request->input('author_id', '');
+        $date = date("Y-m-d H:i:s");
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $input['imagename'] = $image->getClientOriginalName();
+            $destinationPath = public_path('images/books');
+            $image->move($destinationPath, $input['imagename']);
+            $imagePath = 'images/books/' . $input['imagename'];
+        } else {
+            $imagePath = null;
+        }
+
+        $book = DB::table('books')
+            ->insert(['title' => $title, 'description'=>$description, 'isbn'=>$isbn, 'publication_year'=>$publication_year,
+                'price'=>$price, 'genre_id'=>$genre_id, 'stock_level'=>$stock_level, 'type_id'=>$type_id,
+                'publisher_id'=>$publisher_id, 'author_id'=>$author_id, 'image'=>$imagePath, 'created_at'=>$date]);
 
         return response()->json([$book], 200);
     }
