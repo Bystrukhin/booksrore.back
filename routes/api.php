@@ -38,6 +38,8 @@ Route::post('/books/{id}/edit', 'BookController@postEditBook');
 
 Route::post('/books/add', 'BookController@postAddBook');
 
+Route::get('/books/search/{term}', 'BookController@search');
+
 
 Route::get('/publishers', 'PublisherController@getPublishers');
 

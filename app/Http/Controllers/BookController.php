@@ -68,6 +68,8 @@ class BookController extends Controller
     {
         $books = DB::table('books') //TODO use Model class ex. Book::select()->where()->orderBy()->get()
             ->orderBy('book_id', 'desc')
+            ->leftJoin('genre', 'books.genre_id', '=', 'genre.genre_id')
+            ->leftJoin('categories', 'genre.category_id', '=', 'categories.category_id')
             ->take(5)
             ->get();
 
@@ -175,6 +177,20 @@ class BookController extends Controller
                 'publisher_id'=>$publisher_id, 'author_id'=>$author_id, 'image'=>$imagePath, 'created_at'=>$date]);
 
         return response()->json([$book], 200);
+    }
+
+    public function search(Request $request, $term)
+    {
+//        $books = DB::table('books')
+//            ->select('books.*')
+//            ->whereIn('books.title', $term)
+//            ->get();
+        $books = Book::where('title', 'LIKE', '%' . $term . '%')
+            ->leftJoin('genre', 'books.genre_id', '=', 'genre.genre_id')
+            ->leftJoin('categories', 'genre.category_id', '=', 'categories.category_id')
+            ->get();
+
+        return response()->json($books, 200);
     }
 
 }
