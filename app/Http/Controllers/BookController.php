@@ -85,6 +85,8 @@ class BookController extends Controller
     public function getAllBooks()
     {
         $books = DB::table('books')
+            ->leftJoin('genre', 'books.genre_id', '=', 'genre.genre_id')
+            ->leftJoin('categories', 'genre.category_id', '=', 'categories.category_id')
             ->get();
 
         if (!$books) {
@@ -181,10 +183,6 @@ class BookController extends Controller
 
     public function search(Request $request, $term)
     {
-//        $books = DB::table('books')
-//            ->select('books.*')
-//            ->whereIn('books.title', $term)
-//            ->get();
         $books = Book::where('title', 'LIKE', '%' . $term . '%')
             ->leftJoin('genre', 'books.genre_id', '=', 'genre.genre_id')
             ->leftJoin('categories', 'genre.category_id', '=', 'categories.category_id')
