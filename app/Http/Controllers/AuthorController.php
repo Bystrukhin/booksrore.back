@@ -4,37 +4,38 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Author;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Response;
 
 class AuthorController extends Controller
 {
     public function getAuthors(Request $request)
     {
-        $authors = DB::table('authors')
-            ->get();
+        $authors = Author::all();
 
-        return response()->json($authors, 200);
+        if (!$authors) {
+            return response()->json(['message' => 'Authors not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json($authors, Response::HTTP_OK);
     }
 
     public function getDeleteAuthor($id)
     {
-        DB::table('authors')
-            ->where('authors.author_id', $id)
+        Author::where('authors.author_id', $id)
             ->delete();
 
-        return response()->json("Author was deleted", 200);
+        return response()->json("Author was deleted", Response::HTTP_OK);
     }
 
     public function getAuthor(Request $request, $id)
     {
-        $author = DB::table('authors')
-            ->where('authors.author_id', '=', $id)
+        $author = Author::where('authors.author_id', '=', $id)
             ->get();
 
         if (!$author) {
-            return response()->json(['message' => 'Author not found'], 404);
+            return response()->json(['message' => 'Author not found'], Response::HTTP_NOT_FOUND);
         }
-        return response()->json($author, 200);
+        return response()->json($author, Response::HTTP_OK);
     }
 
     public function postEditAuthor(Request $request)
@@ -45,12 +46,15 @@ class AuthorController extends Controller
         $country = $request->input('country', '');
         $date = date("Y-m-d H:i:s");
 
-        $author = DB::table('authors')
-            ->where('authors.author_id', $id)
+        $author = Author::where('authors.author_id', $id)
             ->update(['first_name' => $first_name, 'last_name'=>$last_name,
                 'country'=>$country,'updated_at'=>$date]);
 
-        return response()->json([$author], 200);
+        if (!$author) {
+            return response()->json(['message' => 'Authors not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([$author], Response::HTTP_OK);
     }
 
     public function postAddAuthor(Request $request)
@@ -60,10 +64,13 @@ class AuthorController extends Controller
         $country = $request->input('country', '');
         $date = date("Y-m-d H:i:s");
 
-        $author = DB::table('authors')
-            ->insert(['first_name' => $first_name, 'last_name'=>$last_name,
+        $author = Author::insert(['first_name' => $first_name, 'last_name'=>$last_name,
                 'country'=>$country, 'created_at'=>$date]);
 
-        return response()->json([$author], 200);
+        if (!$author) {
+            return response()->json(['message' => 'Author not added'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([$author], Response::HTTP_OK);
     }
 }

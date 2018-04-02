@@ -4,23 +4,31 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\News;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\Response;
-use Psy\Util\Json;
 
 class NewsController extends Controller
 {
     public function getLastNews()
     {
         $news = News::orderBy('id', 'desc')->take(3)->get();
+
+        if (!$news) {
+            return response()->json(['message' => 'News not found'], Response::HTTP_NOT_FOUND);
+        }
+
         return response()->json($news, Response::HTTP_OK);
     }
 
     public function getNews()
     {
         $news = News::all();
-        return response()->json($news, 200);
+
+        if (!$news) {
+            return response()->json(['message' => 'News not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json($news, Response::HTTP_OK);
     }
 
     public function getArticle(Request $request, $id)
@@ -30,7 +38,8 @@ class NewsController extends Controller
         if (!$article) {
             return response()->json(['message' => 'Document not found'], Response::HTTP_NOT_FOUND); //TODO use trans for const messages
         }
-        return response()->json([$article], 200);
+
+        return response()->json([$article], Response::HTTP_OK);
     }
 
     public function postEditArticle(Request $request)
@@ -52,28 +61,29 @@ class NewsController extends Controller
             $imagePath = $article_old_image;
         }
 
-        $article = DB::table('news')
-            ->where('news.id', $id)
+        $article = News::where('news.id', $id)
             ->update(['title' => $title, 'text'=>$content, 'image'=>$imagePath, 'updated_at'=>$date]);
 
-        return response()->json([$article], 200);
+        if (!$article) {
+            return response()->json(['message' => 'Article not edited'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([$article], Response::HTTP_OK);
     }
 
     public function getDeleteArticle($id)
     {
-        $article = DB::table('news')
-            ->where('news.id', $id)
+        $article = News::where('news.id', $id)
             ->get();
 
         foreach ($article as $item) {
             File::delete(public_path($item->image));
         }
 
-        DB::table('news')
-            ->where('news.id', $id)
+        News::where('news.id', $id)
             ->delete();
 
-        return response()->json("Article was deleted", 200);
+        return response()->json("Article was deleted", Response::HTTP_OK);
     }
 
     public function postAddArticle(Request $request)
@@ -92,9 +102,12 @@ class NewsController extends Controller
             $imagePath = null;
         }
 
-        $article = DB::table('news')
-            ->insert(['title'=>$title, 'text'=>$content, 'image'=>$imagePath, 'created_at'=>$date]);
+        $article = News::insert(['title'=>$title, 'text'=>$content, 'image'=>$imagePath, 'created_at'=>$date]);
 
-        return response()->json([$article], 200);
+        if (!$article) {
+            return response()->json(['message' => 'Article not added'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([$article], Response::HTTP_OK);
     }
 }

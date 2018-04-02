@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Book;
+use App\Genre;
 use JWTAuth;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Response;
 
 class BookController extends Controller
 {
@@ -13,70 +14,65 @@ class BookController extends Controller
     public function getBooks()
     {
         $books = Book::all();
-        return response()->json($books, 200);
+        return response()->json($books, Response::HTTP_OK);
     }
 
     public function getBooksByGenre(Request $request, $genre)
     {
-        $books = DB::table('books')
-            ->leftJoin('genre', 'books.genre_id', '=', 'genre.genre_id')
+        $books = Book::leftJoin('genre', 'books.genre_id', '=', 'genre.genre_id')
             ->where('genre.genre_name', '=', $genre)
             ->leftJoin('categories','genre.category_id', '=', 'categories.category_id')
             ->get();
 
         if (!$books) {
-            return response()->json(['message' => 'News not found'], 404);
+            return response()->json(['message' => 'Books not found'], Response::HTTP_NOT_FOUND);
         }
-        return response()->json($books, 200);
+        return response()->json($books, Response::HTTP_OK);
     }
 
     public function getBooksByCategory(Request $request, $category)
     {
-        $books = DB::table('books')
-            ->leftJoin('genre', 'books.genre_id', '=', 'genre.genre_id')
+        $books = Book::leftJoin('genre', 'books.genre_id', '=', 'genre.genre_id')
             ->leftJoin('categories','genre.category_id', '=', 'categories.category_id')
             ->where('categories.category_name', '=', $category)
             ->get();
 
         if (!$books) {
-            return response()->json(['message' => 'News not found'], 404);
+            return response()->json(['message' => 'News not found'], Response::HTTP_NOT_FOUND);
         }
-        return response()->json($books, 200);
+        return response()->json($books, Response::HTTP_OK);
     }
 
     public function getBookById(Request $request, $id)
     {
-        $book = DB::table('books')
-            ->where('books.book_id', '=', $id)
+        $book = Book::where('books.book_id', '=', $id)
             ->get();
 
         if (!$book) {
-            return response()->json(['message' => 'Book not found'], 404);
+            return response()->json(['message' => 'Book not found'], Response::HTTP_NOT_FOUND);
         }
-        return response()->json($book, 200);
+        return response()->json($book, Response::HTTP_OK);
     }
 
     public function getGenres(Request $request)
     {
-        $genre = DB::table('genre')
-            ->get();
+        $genre = Genre::get();
 
-        return response()->json($genre, 200);
+        return response()->json($genre, Response::HTTP_OK);
     }
 
     public function getBestsellers()
     {
-        $books = DB::table('books') //TODO use Model class ex. Book::select()->where()->orderBy()->get()
-            ->orderBy('book_id', 'desc')
+        $books = Book::orderBy('book_id', 'desc')
             ->leftJoin('genre', 'books.genre_id', '=', 'genre.genre_id')
             ->leftJoin('categories', 'genre.category_id', '=', 'categories.category_id')
             ->take(5)
             ->get();
 
         if (!$books) {
-            return response()->json(['message' => 'Book not found'], 404);
+            return response()->json(['message' => 'Book not found'], Response::HTTP_NOT_FOUND);
         }
-        return response()->json($books, 200);
+        return response()->json($books, Response::HTTP_OK);
     }
 
     /**
@@ -84,32 +80,29 @@ class BookController extends Controller
      */
     public function getAllBooks()
     {
-        $books = DB::table('books')
-            ->leftJoin('genre', 'books.genre_id', '=', 'genre.genre_id')
+        $books = Book::leftJoin('genre', 'books.genre_id', '=', 'genre.genre_id')
             ->leftJoin('categories', 'genre.category_id', '=', 'categories.category_id')
             ->get();
 
         if (!$books) {
-            return response()->json(['message' => 'Book not found'], 404);
+            return response()->json(['message' => 'Book not found'], Response::HTTP_NOT_FOUND);
         }
-        return response()->json($books, 200);
+        return response()->json($books, Response::HTTP_OK);
     }
 
     public function getDeleteBook($id)
     {
-        $book = DB::table('books')
-            ->where('books.book_id', $id)
+        $book = Book::where('books.book_id', $id)
             ->get();
 
         foreach ($book as $item) {
             File::delete(public_path($item->image));
         }
 
-        DB::table('books')
-            ->where('books.book_id', $id)
+        Book::where('books.book_id', $id)
             ->delete();
 
-        return response()->json("Book was deleted", 200);
+        return response()->json("Book was deleted", Response::HTTP_OK);
     }
 
     public function postEditBook(Request $request)
@@ -139,13 +132,16 @@ class BookController extends Controller
             $imagePath = $book_old_image;
         }
 
-        $book = DB::table('books')
-            ->where('books.book_id', $id)
+        $book = Book::where('books.book_id', $id)
             ->update(['title' => $title, 'description'=>$description, 'isbn'=>$isbn, 'publication_year'=>$publication_year,
                 'price'=>$price, 'genre_id'=>$genre_id, 'stock_level'=>$stock_level, 'type_id'=>$type_id,
                 'publisher_id'=>$publisher_id, 'author_id'=>$author_id, 'image'=>$imagePath, 'updated_at'=>$date]);
 
-        return response()->json([$book], 200);
+        if (!$book) {
+            return response()->json(['message' => 'Book not updated'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([$book], Response::HTTP_OK);
     }
 
     public function postAddBook(Request $request)
@@ -173,12 +169,15 @@ class BookController extends Controller
             $imagePath = null;
         }
 
-        $book = DB::table('books')
-            ->insert(['title' => $title, 'description'=>$description, 'isbn'=>$isbn, 'publication_year'=>$publication_year,
+        $book = Book::insert(['title' => $title, 'description'=>$description, 'isbn'=>$isbn, 'publication_year'=>$publication_year,
                 'price'=>$price, 'genre_id'=>$genre_id, 'stock_level'=>$stock_level, 'type_id'=>$type_id,
                 'publisher_id'=>$publisher_id, 'author_id'=>$author_id, 'image'=>$imagePath, 'created_at'=>$date]);
 
-        return response()->json([$book], 200);
+        if (!$book) {
+            return response()->json(['message' => 'Book not added'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([$book], Response::HTTP_OK);
     }
 
     public function search(Request $request, $term)
@@ -188,7 +187,11 @@ class BookController extends Controller
             ->leftJoin('categories', 'genre.category_id', '=', 'categories.category_id')
             ->get();
 
-        return response()->json($books, 200);
+        if (!$books) {
+            return response()->json(['message' => 'Books not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json($books, Response::HTTP_OK);
     }
 
 }

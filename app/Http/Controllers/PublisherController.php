@@ -4,37 +4,38 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Publisher;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Response;
 
 class PublisherController extends Controller
 {
     public function getPublishers(Request $request)
     {
-        $publishers = DB::table('publishers')
-            ->get();
+        $publishers = Publisher::get();
 
-        return response()->json($publishers, 200);
+        if (!$publishers) {
+            return response()->json(['message' => 'Publishers not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json($publishers, Response::HTTP_OK);
     }
 
     public function getDeletePublisher($id)
     {
-        DB::table('publishers')
-            ->where('publishers.publisher_id', $id)
+        Publisher::where('publishers.publisher_id', $id)
             ->delete();
 
-        return response()->json("Publisher was deleted", 200);
+        return response()->json("Publisher was deleted", Response::HTTP_OK);
     }
 
     public function getPublisher(Request $request, $id)
     {
-        $publisher = DB::table('publishers')
-            ->where('publishers.publisher_id', '=', $id)
+        $publisher = Publisher::where('publishers.publisher_id', '=', $id)
             ->get();
 
         if (!$publisher) {
-            return response()->json(['message' => 'Publisher not found'], 404);
+            return response()->json(['message' => 'Publisher not found'], Response::HTTP_NOT_FOUND);
         }
-        return response()->json($publisher, 200);
+        return response()->json($publisher, Response::HTTP_OK);
     }
 
     public function postEditPublisher(Request $request)
@@ -46,12 +47,15 @@ class PublisherController extends Controller
         $country = $request->input('country', '');
         $date = date("Y-m-d H:i:s");
 
-        $publisher = DB::table('publishers')
-            ->where('publishers.publisher_id', $id)
+        $publisher = Publisher::where('publishers.publisher_id', $id)
             ->update(['publisher_name' => $name, 'address'=>$address, 'city'=>$city,
                 'country'=>$country,'updated_at'=>$date]);
 
-        return response()->json([$publisher], 200);
+        if (!$publisher) {
+            return response()->json(['message' => 'Publisher not edited'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([$publisher], Response::HTTP_OK);
     }
 
     public function postAddPublisher(Request $request)
@@ -62,10 +66,13 @@ class PublisherController extends Controller
         $country = $request->input('country', '');
         $date = date("Y-m-d H:i:s");
 
-        $publisher = DB::table('publishers')
-            ->insert(['publisher_name' => $name, 'address'=>$address, 'city'=>$city,
+        $publisher = Publisher::insert(['publisher_name' => $name, 'address'=>$address, 'city'=>$city,
                 'country'=>$country,'created_at'=>$date]);
 
-        return response()->json([$publisher], 200);
+        if (!$publisher) {
+            return response()->json(['message' => 'Publisher not added'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([$publisher], Response::HTTP_OK);
     }
 }

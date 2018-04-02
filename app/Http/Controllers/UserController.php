@@ -6,6 +6,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use JWTAuth;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
@@ -28,7 +29,7 @@ class UserController extends Controller
         $user = User::where('email', $request->input('email'))->get();
         return response()->json(['token' => $token, 'user' => $user,
             'message' => 'Successfully created user!'
-        ], 201);
+        ], Response::HTTP_CREATED);
     }
     public function signin(Request $request)
     {
@@ -42,15 +43,15 @@ class UserController extends Controller
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
                     'error' => 'Invalid Credentials!'
-                ], 401);
+                ], Response::HTTP_UNAUTHORIZED);
             }
         } catch (JWTException $e) {
             return response()->json([
                 'error' => 'Could not create token!'
-            ], 500);
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         return response()->json([
             'token' => $token, 'user' => $user
-        ], 200);
+        ], Response::HTTP_OK);
     }
 }
