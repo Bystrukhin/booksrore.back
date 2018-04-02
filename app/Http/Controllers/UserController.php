@@ -23,7 +23,10 @@ class UserController extends Controller
             'password' => bcrypt($request->input('password'))
         ]);
         $user->save();
-        return response()->json([
+        $credentials = $request->only('email', 'password');
+        $token = JWTAuth::attempt($credentials);
+        $user = User::where('email', $request->input('email'))->get();
+        return response()->json(['token' => $token, 'user' => $user,
             'message' => 'Successfully created user!'
         ], 201);
     }

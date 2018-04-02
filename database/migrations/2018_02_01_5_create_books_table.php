@@ -20,6 +20,7 @@ class CreateBooksTable extends Migration
             $table->string('title');
             $table->string('ISBN');
             $table->text('description');
+            $table->text('image');
             $table->integer('publication_year');
             $table->decimal('price');
             $table->integer('stock_level');
