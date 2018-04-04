@@ -41,6 +41,11 @@ Route::post('/books/add', 'BookController@postAddBook');
 Route::get('/books/search/{term}', 'BookController@search');
 
 
+Route::get('/comments/{id}', 'CommentController@getCommentsByBookId');
+
+Route::post('/comments/add', 'CommentController@postAddComment');
+
+
 Route::get('/publishers', 'PublisherController@getPublishers');
 
 Route::get('/publishers/{id}', 'PublisherController@getPublisher');
@@ -83,9 +88,13 @@ Route::get('/orders', 'OrdersController@getOrders');
 
 Route::get('/orders/{id}', 'OrdersController@getOrderDetails');
 
+Route::get('/orders/user/{id}', 'OrdersController@getOrdersByUser');
+
+
+Route::get('/user/{id}', 'UserController@getUser');
 
 Route::post('/user/signup', [
-    'uses' => 'UserController@signup'
+    'uses' =>'UserController@signup'
 ]);
 
 Route::post('/user/signin', [

@@ -8,9 +8,11 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use JWTAuth;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
+
     public function signup(Request $request)
     {
         $this->validate($request, [
@@ -31,6 +33,7 @@ class UserController extends Controller
             'message' => 'Successfully created user!'
         ], Response::HTTP_CREATED);
     }
+
     public function signin(Request $request)
     {
         $this->validate($request, [
@@ -39,6 +42,10 @@ class UserController extends Controller
         ]);
         $credentials = $request->only('email', 'password');
         $user = User::where('email', $request->input('email'))->get();
+//        $user = DB::table('users')
+//            ->where('users.email', '=', $request->input('email'))
+//            ->get();
+
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
@@ -53,5 +60,16 @@ class UserController extends Controller
         return response()->json([
             'token' => $token, 'user' => $user
         ], Response::HTTP_OK);
+    }
+
+    public function getUser(Request $request, $id)
+    {
+        $user = User::where('user_id', '=', $id)
+            ->get();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
+        return response()->json($user, Response::HTTP_OK);
     }
 }
