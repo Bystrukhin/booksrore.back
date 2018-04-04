@@ -33,4 +33,16 @@ class OrdersController extends Controller
 
         return response()->json($order, Response::HTTP_OK);
     }
+
+    public function getOrdersByUser($id)
+    {
+        $orders = Order::where('user_id', $id)
+            ->get();
+
+        if (!$orders) {
+            return response()->json(['message' => 'Orders not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->json($orders, Response::HTTP_OK);
+    }
 }
