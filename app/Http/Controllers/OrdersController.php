@@ -36,7 +36,7 @@ class OrdersController extends Controller
 
     public function getOrdersByUser($id)
     {
-        $orders = Order::where('user_id', $id)
+        $orders = Order::where('customer_id', $id)
             ->get();
 
         if (!$orders) {

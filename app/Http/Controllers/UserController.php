@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use JWTAuth;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -42,9 +40,6 @@ class UserController extends Controller
         ]);
         $credentials = $request->only('email', 'password');
         $user = User::where('email', $request->input('email'))->get();
-//        $user = DB::table('users')
-//            ->where('users.email', '=', $request->input('email'))
-//            ->get();
 
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
@@ -71,5 +66,26 @@ class UserController extends Controller
             return response()->json(['message' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
         return response()->json($user, Response::HTTP_OK);
+    }
+
+    public function postEditUser(Request $request)
+    {
+        $id = $request->input('id', '');
+        $name = $request->input('name', '');
+        $email = $request->input('email', '');
+        $date = date("Y-m-d H:i:s");
+
+        $user = User::where('users.user_id', $id)
+            ->update(['name' => $name, 'email'=>$email, 'updated_at'=>$date]);
+
+        $user->save();
+
+        $user = User::where('email', $request->input('email'))->get();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not updated'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([$user], Response::HTTP_CREATED);
     }
 }

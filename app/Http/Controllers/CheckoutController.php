@@ -30,7 +30,7 @@ class CheckoutController extends Controller
 
         Order::insert(['order_date' => $date, 'total_price' => $price,
                 'customer_email' => $email, 'customer_first_name' => $orderDetails->firstName,
-                'customer_second_name' => $orderDetails->secondName, 'phone_number' => $orderDetails->phoneNumber,
+                'customer_second_name' => $orderDetails->secondName, 'customer_id' => $orderDetails->user_id, 'phone_number' => $orderDetails->phoneNumber,
                 'address' => $orderDetails->address, 'city' => $orderDetails->city, 'postal_code' => $orderDetails->postalCode,
                 'country' => $orderDetails->country]);
 

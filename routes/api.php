@@ -41,9 +41,15 @@ Route::post('/books/add', 'BookController@postAddBook');
 Route::get('/books/search/{term}', 'BookController@search');
 
 
+Route::get('/comments', 'CommentController@getComments');
+
 Route::get('/comments/{id}', 'CommentController@getCommentsByBookId');
 
+Route::get('/comments/user/{id}', 'CommentController@getCommentsByUserId');
+
 Route::post('/comments/add', 'CommentController@postAddComment');
+
+Route::post('/comments/{id}/edit', 'CommentController@postEditComment');
 
 
 Route::get('/publishers', 'PublisherController@getPublishers');
@@ -93,11 +99,12 @@ Route::get('/orders/user/{id}', 'OrdersController@getOrdersByUser');
 
 Route::get('/user/{id}', 'UserController@getUser');
 
-Route::post('/user/signup', [
-    'uses' =>'UserController@signup'
-]);
+Route::post('/user/{id}/edit', 'UserController@postEditUser');
 
-Route::post('/user/signin', [
-    'uses' => 'UserController@signin'
-]);
+Route::post('/user/signup', ['uses' =>'UserController@signup']);
+
+Route::post('/user/signin', ['uses' => 'UserController@signin']);
+
+
+Route::post('password/reset', 'Auth\ForgotPasswordController@emailPasswordCode');
 
