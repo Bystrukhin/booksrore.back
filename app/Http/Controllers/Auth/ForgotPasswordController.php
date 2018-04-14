@@ -39,12 +39,12 @@ class ForgotPasswordController extends Controller
         $mail = new PHPMailer;
 
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
+        $mail->Host = 'mail.adm.tools';
         $mail->SMTPAuth = true;
         $mail->Username = 'admin@archive.biz.ua';
-        $mail->Password = 'password';
-        $mail->SMTPSecure = 'tls';
-        $mail->Port = 587;
+        $mail->Password = 'afterdark28';
+        $mail->SMTPSecure = false;
+        $mail->Port = 25;
 
         $mail->setFrom('admin@archive.biz.ua', 'Archive');
         $mail->addAddress($email);
@@ -56,7 +56,7 @@ class ForgotPasswordController extends Controller
         $bodyContent .= '<br><p>Try to not forget it!</p>';
         $bodyContent .= '<div>Administration of archive.biz.ua</div>';
 
-        $mail->Subject = 'Email from archive.biz.ua';
+        $mail->Subject = 'Email from back-archive.biz.ua';
         $mail->Body = $bodyContent;
 
         $mail->send();
