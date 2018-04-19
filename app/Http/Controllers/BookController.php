@@ -7,6 +7,7 @@ use App\Genre;
 use JWTAuth;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\File;
 
 class BookController extends Controller
 {

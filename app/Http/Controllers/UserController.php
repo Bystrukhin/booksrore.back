@@ -78,9 +78,7 @@ class UserController extends Controller
         $user = User::where('users.user_id', $id)
             ->update(['name' => $name, 'email'=>$email, 'updated_at'=>$date]);
 
-        $user->save();
-
-        $user = User::where('email', $request->input('email'))->get();
+        $user = User::where('email', $email)->get();
 
         if (!$user) {
             return response()->json(['message' => 'User not updated'], Response::HTTP_BAD_REQUEST);

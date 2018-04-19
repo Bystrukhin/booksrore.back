@@ -47,7 +47,7 @@ Route::get('/comments/{id}', 'CommentController@getCommentsByBookId');
 
 Route::get('/comments/user/{id}', 'CommentController@getCommentsByUserId');
 
-Route::post('/comments/add', 'CommentController@postAddComment');
+Route::put('/comments/add', ['uses' =>'CommentController@postAddComment']);
 
 Route::post('/comments/{id}/edit', 'CommentController@postEditComment');
 
