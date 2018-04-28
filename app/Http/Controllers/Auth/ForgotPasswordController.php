@@ -42,7 +42,7 @@ class ForgotPasswordController extends Controller
         $mail->Host = 'mail.adm.tools';
         $mail->SMTPAuth = true;
         $mail->Username = 'admin@archive.biz.ua';
-        $mail->Password = 'afterdark28';
+        $mail->Password = 'password';
         $mail->SMTPSecure = false;
         $mail->Port = 25;
 

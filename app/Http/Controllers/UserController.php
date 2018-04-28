@@ -41,18 +41,20 @@ class UserController extends Controller
         ]);
 
         $user = User::find($request->input('id', null));
-        $user->name = $request->input('name', '');
-        $user->email = $request->input('email', '');
-        $user->updated_at = date("Y-m-d H:i:s");
-        $user->save();
+        if ($user->remember_token == $request->input('token', '')) {
+            $user->name = $request->input('name', '');
+            $user->email = $request->input('email', '');
+            $user->updated_at = date("Y-m-d H:i:s");
+            $user->save();
+        }
 
-        $user = User::where('email', $request->input('email', ''))->get();
+        $user = User::find($request->input('id', null));
 
-        if (!$user) {
+        if (!$user->remember_token == $request->input('token', '') || !$user) {
             return response()->json(['message' => 'User not updated'], Response::HTTP_BAD_REQUEST);
         }
 
-        return response()->json($user, Response::HTTP_CREATED);
+        return response()->json([$user], Response::HTTP_CREATED);
     }
 
     /**
@@ -68,14 +70,15 @@ class UserController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required'
         ]);
+        $credentials = $request->only('email', 'password');
+        $token = JWTAuth::attempt($credentials);
         $user = new User([
             'name' => $request->input('name'),
+            'remember_token' => $token,
             'email' => $request->input('email'),
             'password' => bcrypt($request->input('password'))
         ]);
         $user->save();
-        $credentials = $request->only('email', 'password');
-        $token = JWTAuth::attempt($credentials);
         $user = User::where('email', $request->input('email'))->get();
         return response()->json(['token' => $token, 'user' => $user,
             'message' => 'Successfully created user!'
@@ -89,8 +92,6 @@ class UserController extends Controller
             'password' => 'required'
         ]);
         $credentials = $request->only('email', 'password');
-        $user = User::where('email', $request->input('email'))->get();
-
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
@@ -102,6 +103,10 @@ class UserController extends Controller
                 'error' => 'Could not create token!'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+        $user = User::where('email', $request->input('email'))->first();
+        $user->remember_token = $token;
+        $user->save();
+
         return response()->json([
             'token' => $token, 'user' => $user
         ], Response::HTTP_OK);
