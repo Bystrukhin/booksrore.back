@@ -8,7 +8,12 @@ use Illuminate\Http\Response;
 
 class AuthorController extends Controller
 {
-    public function getAuthors(Request $request)
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
     {
         $authors = Author::all();
 
@@ -19,36 +24,72 @@ class AuthorController extends Controller
         return response()->json($authors, Response::HTTP_OK);
     }
 
-    public function getDeleteAuthor($id)
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
     {
-        Author::where('authors.author_id', $id)
-            ->delete();
+        $this->validate($request, [
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'country' => 'required'
+        ]);
 
-        return response()->json("Author was deleted", Response::HTTP_OK);
+        $author = new Author([
+            'first_name' => $request->input('first_name', ''),
+            'last_name' => $request->input('last_name', ''),
+            'country' => $request->input('country', ''),
+            'updated_at' => date("Y-m-d H:i:s")
+        ]);
+        $author->save();
+
+        if (!$author) {
+            return response()->json(['message' => 'Author not added'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([$author], Response::HTTP_OK);
     }
 
-    public function getAuthor(Request $request, $id)
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
     {
-        $author = Author::where('authors.author_id', '=', $id)
-            ->get();
+        $author = Author::find($id);
 
         if (!$author) {
             return response()->json(['message' => 'Author not found'], Response::HTTP_NOT_FOUND);
         }
-        return response()->json($author, Response::HTTP_OK);
+        return response()->json([$author], Response::HTTP_OK);
     }
 
-    public function postEditAuthor(Request $request)
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request)
     {
-        $id = $request->input('id', '');
-        $first_name = $request->input('first_name', '');
-        $last_name = $request->input('last_name', '');
-        $country = $request->input('country', '');
-        $date = date("Y-m-d H:i:s");
+        $this->validate($request, [
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'country' => 'required'
+        ]);
 
-        $author = Author::where('authors.author_id', $id)
-            ->update(['first_name' => $first_name, 'last_name'=>$last_name,
-                'country'=>$country,'updated_at'=>$date]);
+        $author = Author::find($request->input('id', null));
+        $author->first_name = $request->input('first_name', '');
+        $author->last_name = $request->input('last_name', '');
+        $author->country = $request->input('country', '');
+        $author->updated_at = date("Y-m-d H:i:s");
+        $author->save();
 
         if (!$author) {
             return response()->json(['message' => 'Authors not found'], Response::HTTP_NOT_FOUND);
@@ -57,20 +98,22 @@ class AuthorController extends Controller
         return response()->json([$author], Response::HTTP_OK);
     }
 
-    public function postAddAuthor(Request $request)
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
     {
-        $first_name = $request->input('first_name', '');
-        $last_name = $request->input('last_name', '');
-        $country = $request->input('country', '');
-        $date = date("Y-m-d H:i:s");
-
-        $author = Author::insert(['first_name' => $first_name, 'last_name'=>$last_name,
-                'country'=>$country, 'created_at'=>$date]);
+        $author = Author::find($id);
 
         if (!$author) {
-            return response()->json(['message' => 'Author not added'], Response::HTTP_BAD_REQUEST);
+            return response()->json(['message' => 'Author not found'], Response::HTTP_NOT_FOUND);
         }
 
-        return response()->json([$author], Response::HTTP_OK);
+        $author->delete();
+
+        return response()->json("Author was deleted", Response::HTTP_OK);
     }
 }

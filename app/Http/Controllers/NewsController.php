@@ -9,18 +9,12 @@ use Illuminate\Http\Response;
 
 class NewsController extends Controller
 {
-    public function getLastNews()
-    {
-        $news = News::orderBy('id', 'desc')->take(3)->get();
-
-        if (!$news) {
-            return response()->json(['message' => 'News not found'], Response::HTTP_NOT_FOUND);
-        }
-
-        return response()->json($news, Response::HTTP_OK);
-    }
-
-    public function getNews()
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
     {
         $news = News::all();
 
@@ -31,7 +25,51 @@ class NewsController extends Controller
         return response()->json($news, Response::HTTP_OK);
     }
 
-    public function getArticle(Request $request, $id)
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $this->validate($request, [
+            'title' => 'required',
+            'text'=>'required',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $input['imagename'] = $image->getClientOriginalName();
+            $destinationPath = public_path('images/news_images');
+            $image->move($destinationPath, $input['imagename']);
+            $imagePath = 'images/news_images/' . $input['imagename'];
+        } else {
+            $imagePath = null;
+        }
+
+        $article = new News([
+            'title'=>$request->input('title', ''),
+            'text'=>$request->input('text', ''),
+            'image'=>$imagePath,
+            'created_at'=>date("Y-m-d H:i:s")
+        ]);
+        $article->save();
+
+        if (!$article) {
+            return response()->json(['message' => 'Article not added'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json($article, Response::HTTP_OK);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
     {
         $article = News::find($id);
 
@@ -42,12 +80,20 @@ class NewsController extends Controller
         return response()->json([$article], Response::HTTP_OK);
     }
 
-    public function postEditArticle(Request $request)
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request)
     {
-        $id = $request->input('id', '');
-        $title = $request->input('title', '');
-        $content = $request->input('text', '');
-        $date = date("Y-m-d H:i:s");
+        $this->validate($request, [
+            'title' => 'required',
+            'text'=>'required',
+        ]);
+
         $article_old_image = $request->input('article_old_image', '');
 
         if ($request->hasFile('image')) {
@@ -61,53 +107,49 @@ class NewsController extends Controller
             $imagePath = $article_old_image;
         }
 
-        $article = News::where('news.id', $id)
-            ->update(['title' => $title, 'text'=>$content, 'image'=>$imagePath, 'updated_at'=>$date]);
+        $article = News::find($request->input('id', null));
+        $article->title = $request->input('title', '');
+        $article->text = $request->input('text', '');
+        $article->image = $imagePath;
+        $article->updated_at = date("Y-m-d H:i:s");
+        $article->save();
 
         if (!$article) {
             return response()->json(['message' => 'Article not edited'], Response::HTTP_BAD_REQUEST);
         }
 
-        return response()->json([$article], Response::HTTP_OK);
+        return response()->json($article, Response::HTTP_OK);
     }
 
-    public function getDeleteArticle($id)
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
     {
-        $article = News::where('news.id', $id)
-            ->get();
+        $article = News::find($id);
 
-        foreach ($article as $item) {
-            File::delete(public_path($item->image));
+        if (!$article) {
+            return response()->json(['message' => 'Article was not deleted'], Response::HTTP_NOT_FOUND);
         }
 
-        News::where('news.id', $id)
-            ->delete();
+        File::delete(public_path($article->image));
+
+        $article->delete();
 
         return response()->json("Article was deleted", Response::HTTP_OK);
     }
 
-    public function postAddArticle(Request $request)
+    public function getLastNews()
     {
-        $title = $request->input('title', '');
-        $content = $request->input('text', '');
-        $date = $date = date("Y-m-d H:i:s");
+        $news = News::orderBy('id', 'desc')->take(3)->get();
 
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $input['imagename'] = $image->getClientOriginalName();
-            $destinationPath = public_path('images/news_images');
-            $image->move($destinationPath, $input['imagename']);
-            $imagePath = 'images/news_images/' . $input['imagename'];
-        } else {
-            $imagePath = null;
+        if (!$news) {
+            return response()->json(['message' => 'News not found'], Response::HTTP_NOT_FOUND);
         }
 
-        $article = News::insert(['title'=>$title, 'text'=>$content, 'image'=>$imagePath, 'created_at'=>$date]);
-
-        if (!$article) {
-            return response()->json(['message' => 'Article not added'], Response::HTTP_BAD_REQUEST);
-        }
-
-        return response()->json([$article], Response::HTTP_OK);
+        return response()->json($news, Response::HTTP_OK);
     }
 }

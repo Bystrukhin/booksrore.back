@@ -8,9 +8,14 @@ use Illuminate\Http\Response;
 
 class PublisherController extends Controller
 {
-    public function getPublishers(Request $request)
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
     {
-        $publishers = Publisher::get();
+        $publishers = Publisher::all();
 
         if (!$publishers) {
             return response()->json(['message' => 'Publishers not found'], Response::HTTP_NOT_FOUND);
@@ -19,60 +24,100 @@ class PublisherController extends Controller
         return response()->json($publishers, Response::HTTP_OK);
     }
 
-    public function getDeletePublisher($id)
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
     {
-        Publisher::where('publishers.publisher_id', $id)
-            ->delete();
+        $this->validate($request, [
+            'publisher_name' => 'required',
+            'address' => 'required',
+            'city' => 'required',
+            'country' => 'required'
+        ]);
 
-        return response()->json("Publisher was deleted", Response::HTTP_OK);
-    }
-
-    public function getPublisher(Request $request, $id)
-    {
-        $publisher = Publisher::where('publishers.publisher_id', '=', $id)
-            ->get();
-
-        if (!$publisher) {
-            return response()->json(['message' => 'Publisher not found'], Response::HTTP_NOT_FOUND);
-        }
-        return response()->json($publisher, Response::HTTP_OK);
-    }
-
-    public function postEditPublisher(Request $request)
-    {
-        $id = $request->input('id', '');
-        $name = $request->input('publisher_name', '');
-        $address = $request->input('address', '');
-        $city = $request->input('city', '');
-        $country = $request->input('country', '');
-        $date = date("Y-m-d H:i:s");
-
-        $publisher = Publisher::where('publishers.publisher_id', $id)
-            ->update(['publisher_name' => $name, 'address'=>$address, 'city'=>$city,
-                'country'=>$country,'updated_at'=>$date]);
-
-        if (!$publisher) {
-            return response()->json(['message' => 'Publisher not edited'], Response::HTTP_BAD_REQUEST);
-        }
-
-        return response()->json([$publisher], Response::HTTP_OK);
-    }
-
-    public function postAddPublisher(Request $request)
-    {
-        $name = $request->input('publisher_name', '');
-        $address = $request->input('address', '');
-        $city = $request->input('city', '');
-        $country = $request->input('country', '');
-        $date = date("Y-m-d H:i:s");
-
-        $publisher = Publisher::insert(['publisher_name' => $name, 'address'=>$address, 'city'=>$city,
-                'country'=>$country,'created_at'=>$date]);
+        $publisher = new Publisher([
+            'publisher_name' => $request->input('publisher_name', ''),
+            'address' => $request->input('address', ''),
+            'city' => $request->input('city', ''),
+            'country' => $request->input('country', ''),
+            'created_at' => date("Y-m-d H:i:s")
+        ]);
+        $publisher->save();
 
         if (!$publisher) {
             return response()->json(['message' => 'Publisher not added'], Response::HTTP_BAD_REQUEST);
         }
 
+        return response()->json($publisher, Response::HTTP_OK);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $publisher = Publisher::find($id);
+
+        if (!$publisher) {
+            return response()->json(['message' => 'Publisher not found'], Response::HTTP_NOT_FOUND);
+        }
         return response()->json([$publisher], Response::HTTP_OK);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request)
+    {
+        $this->validate($request, [
+            'publisher_name' => 'required',
+            'address' => 'required',
+            'city' => 'required',
+            'country' => 'required'
+        ]);
+
+        $publisher = Publisher::find($request->input('id', null));
+        $publisher->publisher_name = $request->input('publisher_name', '');
+        $publisher->address = $request->input('address', '');
+        $publisher->city = $request->input('city', '');
+        $publisher->country = $request->input('country', '');
+        $publisher->updated_at = date("Y-m-d H:i:s");
+        $publisher->save();
+
+        if (!$publisher) {
+            return response()->json(['message' => 'Publisher not edited'], Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json($publisher, Response::HTTP_OK);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $publisher = Publisher::find($id);
+
+        if (!$publisher) {
+            return response()->json(['message' => 'Publisher not found though not deleted'], Response::HTTP_NOT_FOUND);
+        }
+
+        $publisher->delete();
+
+        return response()->json("Publisher was deleted", Response::HTTP_OK);
     }
 }

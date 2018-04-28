@@ -20,90 +20,80 @@ Route::get('/categories_menu',function(){
 });
 
 
-Route::get('/books', 'BookController@getAllBooks');
-
-Route::get('/books/bestsellers', 'BookController@getBestsellers');
-
-Route::get('/books/genres', 'BookController@getGenres');
-
-Route::get('/books/category/{category}', 'BookController@getBooksByCategory');
-
-Route::get('/books/genre/{genre}', 'BookController@getBooksByGenre');
-
-Route::get('/books/{id}', 'BookController@getBookById');
-
-Route::get('/books/{id}/delete', 'BookController@getDeleteBook');
-
-Route::post('/books/{id}/edit', 'BookController@postEditBook');
-
-Route::post('/books/add', 'BookController@postAddBook');
+Route::get('/books/bestsellers', 'BookController@bestsellers');
 
 Route::get('/books/search/{term}', 'BookController@search');
 
+Route::post('/books/update', 'BookController@update');
 
-Route::get('/comments', 'CommentController@getComments');
+Route::get('/books/destroy/{id}', 'BookController@destroy');
 
-Route::get('/comments/{id}', 'CommentController@getCommentsByBookId');
+Route::resource('books', 'BookController', ['except' => [
+    'create', 'edit', 'update', 'destroy'
+]]);
+
+Route::resource('category', 'CategoryController', ['only' => [
+    'index'
+]]);
+
+
+Route::resource('genre', 'GenreController', ['only' => [
+    'index', 'show'
+]]);
+
 
 Route::get('/comments/user/{id}', 'CommentController@getCommentsByUserId');
 
-Route::put('/comments/add', ['uses' =>'CommentController@postAddComment']);
+Route::post('/comments/update', 'CommentController@update');
 
-Route::post('/comments/{id}/edit', 'CommentController@postEditComment');
-
-
-Route::get('/publishers', 'PublisherController@getPublishers');
-
-Route::get('/publishers/{id}', 'PublisherController@getPublisher');
-
-Route::get('/publishers/{id}/delete', 'PublisherController@getDeletePublisher');
-
-Route::post('/publishers/{id}/edit', 'PublisherController@postEditPublisher');
-
-Route::post('/publishers/add', 'PublisherController@postAddPublisher');
+Route::resource('comments', 'CommentController', ['only' => [
+    'index', 'show', 'store'
+]]);
 
 
-Route::get('/authors', 'AuthorController@getAuthors');
+Route::post('/publishers/update', 'PublisherController@update');
 
-Route::get('/authors/{id}', 'AuthorController@getAuthor');
+Route::get('/publishers/destroy/{id}', 'PublisherController@destroy');
 
-Route::get('/authors/{id}/delete', 'AuthorController@getDeleteAuthor');
-
-Route::post('/authors/{id}/edit', 'AuthorController@postEditAuthor');
-
-Route::post('/authors/add', 'AuthorController@postAddAuthor');
+Route::resource('publishers', 'PublisherController', ['except' => [
+    'create', 'edit', 'update', 'destroy'
+]]);
 
 
-Route::get('/news', 'NewsController@getNews');
+Route::post('/authors/update', 'AuthorController@update');
+
+Route::get('/authors/destroy/{id}', 'AuthorController@destroy');
+
+Route::resource('authors', 'AuthorController', ['except' => [
+    'create', 'edit', 'update', 'destroy'
+]]);
+
 
 Route::get('/news/last', 'NewsController@getLastNews');
 
-Route::get('/news/{id}', 'NewsController@getArticle');
+Route::post('/news/update', 'NewsController@update');
 
-Route::post('/news/{id}/edit', 'NewsController@postEditArticle');
+Route::get('/news/destroy/{id}', 'NewsController@destroy');
 
-Route::post('/news/add', 'NewsController@postAddArticle');
+Route::resource('news', 'NewsController', ['except' => [
+    'create', 'edit', 'update', 'destroy'
+]]);
 
-Route::get('/news/{id}/delete', 'NewsController@getDeleteArticle');
-
-
-Route::post('/checkout', 'CheckoutController@makePayment');
-
-
-Route::get('/orders', 'OrdersController@getOrders');
-
-Route::get('/orders/{id}', 'OrdersController@getOrderDetails');
 
 Route::get('/orders/user/{id}', 'OrdersController@getOrdersByUser');
 
+Route::resource('orders', 'OrdersController', ['only' => [
+    'show', 'index', 'store'
+]]);
 
-Route::get('/user/{id}', 'UserController@getUser');
-
-Route::post('/user/{id}/edit', 'UserController@postEditUser');
-
-Route::post('/user/signup', ['uses' =>'UserController@signup']);
 
 Route::post('/user/signin', ['uses' => 'UserController@signin']);
+
+Route::post('/user/update', 'UserController@update');
+
+Route::resource('user', 'UserController', ['only' => [
+    'show', 'store'
+]]);
 
 
 Route::post('password/reset', 'Auth\ForgotPasswordController@emailPasswordCode');
