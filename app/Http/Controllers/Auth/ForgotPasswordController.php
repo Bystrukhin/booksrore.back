@@ -33,8 +33,10 @@ class ForgotPasswordController extends Controller
         $user = User::where('users.email', $email);
 
         $newCode = bcrypt($code);
-        User::where('users.email', $request->input('email', ''))
-            ->update(['password'=> $newCode, 'updated_at'=>$date]);
+        $user = User::where('email', $request->input('email'))->first();
+        $user->password = $newCode;
+        $user->updated_at = $date;
+        $user->save();
 
         $mail = new PHPMailer;
 

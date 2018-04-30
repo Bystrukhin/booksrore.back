@@ -54,7 +54,7 @@ class OrdersController extends Controller
      */
     public function store(Request $request)
     {
-        Stripe::setApiKey("sk_test_key");
+        Stripe::setApiKey("sk_test_password");
 
         $token = $request->input('token');
         $email = $request->input('email');

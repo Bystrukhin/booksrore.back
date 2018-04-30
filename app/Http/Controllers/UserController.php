@@ -41,16 +41,14 @@ class UserController extends Controller
         ]);
 
         $user = User::find($request->input('id', null));
-        if ($user->remember_token == $request->input('token', '')) {
-            $user->name = $request->input('name', '');
-            $user->email = $request->input('email', '');
-            $user->updated_at = date("Y-m-d H:i:s");
-            $user->save();
-        }
+        $user->name = $request->input('name', '');
+        $user->email = $request->input('email', '');
+        $user->updated_at = date("Y-m-d H:i:s");
+        $user->save();
 
         $user = User::find($request->input('id', null));
 
-        if (!$user->remember_token == $request->input('token', '') || !$user) {
+        if (!$user) {
             return response()->json(['message' => 'User not updated'], Response::HTTP_BAD_REQUEST);
         }
 

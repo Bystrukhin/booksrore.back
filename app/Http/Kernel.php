@@ -2,7 +2,6 @@
 
 namespace App\Http;
 
-use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -61,5 +60,7 @@ class Kernel extends HttpKernel
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'auth.jwt' => \Tymon\JWTAuth\Middleware\GetUserFromToken::class,
+        'admin.token' => \App\Http\Middleware\VerifyAdminToken::class,
+        'user.token' => \App\Http\Middleware\VerifyUserToken::class,
     ];
 }
