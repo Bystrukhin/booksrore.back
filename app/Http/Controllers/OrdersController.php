@@ -8,6 +8,7 @@ use App\OrderDetails;
 use Illuminate\Http\Response;
 use Stripe\Stripe;
 use Stripe\Charge;
+use PHPMailer\PHPMailer\PHPMailer;
 
 class OrdersController extends Controller
 {
@@ -111,6 +112,32 @@ class OrdersController extends Controller
                 "description" => "Example charge",
                 "source" => $token,
             ));
+            if ($charge) {
+                $mail = new PHPMailer;
+
+                $mail->isSMTP();
+                $mail->Host = 'mail.adm.tools';
+                $mail->SMTPAuth = true;
+                $mail->Username = 'admin@archive.biz.ua';
+                $mail->Password = 'password';
+                $mail->SMTPSecure = false;
+                $mail->Port = 25;
+
+                $mail->setFrom('admin@archive.biz.ua', 'Archive');
+                $mail->addAddress($email);
+
+                $mail->isHTML(true);
+
+                $bodyContent = '<h2>Hello!</h2>';
+                $bodyContent .= '<div>We have received your payment. Your order id is  </div>'. $order_id->order_id;
+                $bodyContent .= '<br><p>We will email you about farther details!</p>';
+                $bodyContent .= '<div>Administration of archive.biz.ua</div>';
+
+                $mail->Subject = 'Email from back-archive.biz.ua';
+                $mail->Body = $bodyContent;
+
+                $mail->send();
+            }
         }
 
         if (!$charge) {
