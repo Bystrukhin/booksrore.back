@@ -11,6 +11,11 @@ use Stripe\Charge;
 
 class OrdersController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('user.token')->only('getOrdersByUser');
+    }
+
     /**
      * Display a listing of the resource.
      *

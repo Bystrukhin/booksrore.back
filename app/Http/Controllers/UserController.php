@@ -10,6 +10,11 @@ use Illuminate\Http\Response;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('user.token')->only('update');
+    }
+
     /**
      * Display the specified resource.
      *

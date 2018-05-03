@@ -8,6 +8,11 @@ use Illuminate\Http\Response;
 
 class AuthorController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('admin.token')->only('update', 'destroy', 'store');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -101,18 +106,18 @@ class AuthorController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int  $author
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($author)
     {
-        $author = Author::find($id);
+        $author = Author::destroy($author);
 
         if (!$author) {
             return response()->json(['message' => 'Author not found'], Response::HTTP_NOT_FOUND);
         }
-
-        $author->delete();
+//
+//        $author->delete();
 
         return response()->json("Author was deleted", Response::HTTP_OK);
     }

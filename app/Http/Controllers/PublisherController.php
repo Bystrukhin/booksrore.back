@@ -8,6 +8,11 @@ use Illuminate\Http\Response;
 
 class PublisherController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('admin.token')->only('update', 'destroy', 'store');
+    }
+
     /**
      * Display a listing of the resource.
      *

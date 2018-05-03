@@ -8,6 +8,11 @@ use Illuminate\Http\Response;
 
 class CommentController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('admin.token')->only('update');
+    }
+
     /**
      * Display a listing of the resource.
      *
