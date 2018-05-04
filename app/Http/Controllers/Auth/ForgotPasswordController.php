@@ -32,36 +32,38 @@ class ForgotPasswordController extends Controller
         $date = date("Y-m-d H:i:s");
         $user = User::where('users.email', $email);
 
-        $newCode = bcrypt($code);
-        $user = User::where('email', $request->input('email'))->first();
-        $user->password = $newCode;
-        $user->updated_at = $date;
-        $user->save();
+        if ($email !== 'admin@archive.biz.ua') {
+            $newCode = bcrypt($code);
+            $user = User::where('email', $request->input('email'))->first();
+            $user->password = $newCode;
+            $user->updated_at = $date;
+            $user->save();
 
-        $mail = new PHPMailer;
+            $mail = new PHPMailer;
 
-        $mail->isSMTP();
-        $mail->Host = 'mail.adm.tools';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'admin@archive.biz.ua';
-        $mail->Password = 'password';
-        $mail->SMTPSecure = false;
-        $mail->Port = 25;
+            $mail->isSMTP();
+            $mail->Host = 'mail.adm.tools';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'admin@archive.biz.ua';
+            $mail->Password = 'password';
+            $mail->SMTPSecure = false;
+            $mail->Port = 25;
 
-        $mail->setFrom('admin@archive.biz.ua', 'Archive');
-        $mail->addAddress($email);
+            $mail->setFrom('admin@archive.biz.ua', 'Archive');
+            $mail->addAddress($email);
 
-        $mail->isHTML(true);
+            $mail->isHTML(true);
 
-        $bodyContent = '<h2>Hello!</h2>';
-        $bodyContent .= '<div>Accordingly to your request, password was changed to </div>'. $code;
-        $bodyContent .= '<br><p>Try to not forget it!</p>';
-        $bodyContent .= '<div>Administration of archive.biz.ua</div>';
+            $bodyContent = '<h2>Hello!</h2>';
+            $bodyContent .= '<div>Accordingly to your request, password was changed to </div>'. $code;
+            $bodyContent .= '<br><p>Try to not forget it!</p>';
+            $bodyContent .= '<div>Administration of archive.biz.ua</div>';
 
-        $mail->Subject = 'Email from back-archive.biz.ua';
-        $mail->Body = $bodyContent;
+            $mail->Subject = 'Email from back-archive.biz.ua';
+            $mail->Body = $bodyContent;
 
-        $mail->send();
+            $mail->send();
+        }
 
         if (!$user) {
         return response()->json(['No user found'], Response::HTTP_BAD_REQUEST);

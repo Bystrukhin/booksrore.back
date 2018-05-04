@@ -62,7 +62,7 @@ class BookController extends Controller
         $book = new Book([
             'title' => $request->input('title', ''),
             'description'=>$request->input('description', ''),
-            'isbn'=>$request->input('isbn', '11111'),
+            'ISBN'=>$request->input('isbn', '11111'),
             'publication_year'=>$request->input('publication_year', null),
             'price'=>$request->input('price', null),
             'genre_id'=>$request->input('genre_id', null),
